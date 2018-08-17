@@ -1,21 +1,2 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
-#container{
-	display:flex;
-	width:100%;
-}
-.child{
-	background:red;
-	/*width:200px;*/
-	flex:1;
-	height:200px;
-}
-#child1{
-	background-color:red;
-}
-#child2{
-	background-color:blue;
-}
-#child3{
-	background-color:green;
-}
