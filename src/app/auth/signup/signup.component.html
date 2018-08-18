@@ -1,5 +1,5 @@
 <section class="signup-form">
-	<form fxLayout="column" fxLayoutAlign="center center" #f="ngForm" (ngSubmit)="onSubmit(f)">
+	<form fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="50px" #f="ngForm" (ngSubmit)="onSubmit(f)">
 		<mat-form-field>
 			<input 	type="email" 	matInput placeholder="Your Email" ngModel name="email" email required #emailInput="ngModel">
 			<!-- show this error only if 'required' returns false (so if it's empty) -->
@@ -14,10 +14,13 @@
 		</mat-form-field>
 
 		<mat-form-field>
-		  <input matInput [matDatepicker]="picker" [max]="maxDate" placeholder="Your Birthdate">
+		  <input matInput [matDatepicker]="picker" [max]="maxDate" placeholder="Your Birthdate" ngModel name="birthdate" required>
 		  <mat-datepicker-toggle [for]="picker" matSuffix></mat-datepicker-toggle>
 		  <mat-datepicker #picker></mat-datepicker>
 		</mat-form-field>
-		<button type="submit" mat-raised-button color="primary">Submit</button>
+
+		<mat-checkbox ngModel name="agree" required>Agree to terms and connditions</mat-checkbox>
+
+		<button type="submit" mat-raised-button color="primary" [disabled]="f.invalid">Submit</button>
 	</form>
 </section>
