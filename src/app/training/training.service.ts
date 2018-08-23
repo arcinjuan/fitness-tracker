@@ -12,7 +12,10 @@ export class TrainingService {
 		{id: 'burpees', name: 'Burpees', duration: 60, calories: 8},
 	];
 	// store the users selected excercise
-	private runningExcercise : Excercise
+	private runningExcercise : Excercise;
+	private excercises: Excercise[] =[
+
+	];
 
 	getAvailableExcercises() {
 		// slice() creates a copy of the available excercises so 
@@ -22,8 +25,6 @@ export class TrainingService {
 	}
 
 	startExcercise(selectedId: string) {
-
-    console.log('test')
 		// we take the selected excercise (matched by ID), and store it into selectedExcercise
 		const selectedExcercise = this.availableExcercises.find( ex => ex.id === selectedId);
 		// we set the selectedExcercise as the running excercise
@@ -31,7 +32,30 @@ export class TrainingService {
 		this.excerciseChanged.next({...this.runningExcercise})
 	}
 
+	completeExcercise() {
+		this.excercises.push({ ...this.runningExcercise, date: new Date(), state: 'completed'});
+		this.runningExcercise = null;
+		this.excerciseChanged.next(null);
+	}
+
+	cancelExcercise(progress: number) {
+		this.excercises.push({ 
+			...this.runningExcercise, 
+			duration: this.runningExcercise.duration * (progress / 100), 
+			calories: this.runningExcercise.calories * (progress / 100),
+			date: new Date(), 
+			state: 'cancelled'
+		});
+
+		this.runningExcercise = null;
+		this.excerciseChanged.next(null);
+	}
+
 	getRunningExcercise() {
 		return { ...this.runningExcercise }
+	}
+
+	getCompletedOrCancelledExcercises() {
+		return this.excercises.slice();
 	}
 }
