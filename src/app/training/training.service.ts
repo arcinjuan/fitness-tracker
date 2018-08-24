@@ -1,34 +1,40 @@
-import { Subject } from 'rxjs/subject';
+import { Injectable } from '@angular/core';
+import {AngularFirestore} from 'angularfire2/firestore';
+import { Subject } from 'rxjs/Subject';
 
 import { Excercise } from './excercise.model';
 
-
+@Injectable()
 export class TrainingService {
 	excerciseChanged = new Subject<Excercise>();
-	private availableExcercises: Excercise[] = [
-		{id: 'crunches', name: 'Crunches', duration: 30, calories: 8},
-		{id: 'touch-toes', name: 'Touch Toes', duration: 180, calories: 15},
-		{id: 'side-lounges', name: 'Side Lunges', duration: 120, calories: 18},
-		{id: 'burpees', name: 'Burpees', duration: 60, calories: 8},
-	];
-	// store the users selected excercise
+	excercisesChanged = new Subject<Excercise[]>();
+	private availableExcercises: Excercise[] = []
 	private runningExcercise : Excercise;
-	private excercises: Excercise[] =[
+	private excercises: Excercise[] =[];
 
-	];
-
-	getAvailableExcercises() {
-		// slice() creates a copy of the available excercises so 
-		// the component using it will edit the copy and not the 
-		// original object in the service
-		return this.availableExcercises.slice()
+	constructor(private db: AngularFirestore) {}
+	fetchAvailableExcercises() {
+		this.db
+    .collection('availableExcercises')
+    .snapshotChanges()
+    .map(docArray => {
+      return docArray.map(doc =>{
+        return {
+          id: doc.payload.doc.id,
+          name: doc.payload.doc.data().name,
+          calories: doc.payload.doc.data().calories,
+          duration: doc.payload.doc.data().duration
+        };
+      });
+    })
+    .subscribe((excercises: Excercise[]) => {
+    	this.availableExcercises = excercises;
+    	this.excercisesChanged.next([...this.availableExcercises]);
+    })
 	}
 
 	startExcercise(selectedId: string) {
-		// we take the selected excercise (matched by ID), and store it into selectedExcercise
-		const selectedExcercise = this.availableExcercises.find( ex => ex.id === selectedId);
-		// we set the selectedExcercise as the running excercise
-		this.runningExcercise = selectedExcercise;
+		this.runningExcercise = this.availableExcercises.find(ex => ex.id === selectedId);
 		this.excerciseChanged.next({...this.runningExcercise})
 	}
 
