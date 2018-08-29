@@ -5,6 +5,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 
 import { User } from './user.model';
 import { AuthData } from './auth-data.model';
+import { TrainingService } from '../training/training.service';
 
 // @Injectable allows us to bring a service into a service
 // in this case we need it to bring in the Router service
@@ -12,12 +13,9 @@ import { AuthData } from './auth-data.model';
 export class AuthService {
 	// Subject is an rxjs version of EventEmitter
 	authChange = new Subject<boolean>();
+	private isAuthenticated = false;
 
-	// store the currently authenticated user (grabbed from user.model)
-	// by making this a private field, we can only access it form inside this service
-	private user: User;
-
-	constructor(private router: Router, private afAuth: AngularFireAuth) {}
+	constructor(private router: Router, private afAuth: AngularFireAuth, private trainingService: TrainingService) {}
 
 	// on register or login turn user into an object
 	registerUser(authData: AuthData){
@@ -25,8 +23,7 @@ export class AuthService {
 			authData.email, 
 			authData.password
 		).then(result => {
-			console.log(result);
-			this.authSuccessfully();
+			this.authSuccessfully('/training');
 		})
 		.catch( error => {
 			console.log(error);
@@ -40,7 +37,7 @@ export class AuthService {
 			authData.password
 		).then(result => {
 			console.log(result);
-			this.authSuccessfully();
+			this.authSuccessfully('/training');
 		})
 		.catch( error => {
 			console.log(error);
@@ -51,29 +48,21 @@ export class AuthService {
 
 	// on logout get rid of user
 	logout() {
-		this.user = null
-		// emmit that there was a change in Authentication. Set to false
-		this.authChange.next(false);
-		this.authSuccessfully('/login');
-	}
-
-	// returns the value of user
-	getUser(){
-		// return the user object. By spreading it (...) we dont return the original object. 
-		// since it's set to private it isnt shareable outside the service anyway
-		// so we spread it to create a new shareable copy of the object. This also helps 
-		// ensure that the original object is not changed or affected within the service.
-		// only the copy is manipulated. 
-		return { ...this.user };
+    this.trainingService.cancelSubscriptions();
+    this.afAuth.auth.signOut();
+    this.authChange.next(false);
+    this.router.navigate(['/login']);
+    this.isAuthenticated = false;
 	}
 
 	// check to see if user is NOT null
 	// when not null, user is authenticated
 	isAuth() {
-		return this.user != null;
+		return this.isAuthenticated;
 	}
 
 	private authSuccessfully(navigateTo) {
+		this.isAuthenticated = true;
 		// emmit that there was a change in Authentication. Set to true 
 		this.authChange.next(true);
 		this.router.navigate([navigateTo]);
