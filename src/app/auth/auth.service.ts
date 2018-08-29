@@ -23,7 +23,7 @@ export class AuthService {
 			authData.email, 
 			authData.password
 		).then(result => {
-			this.authSuccessfully();
+			this.authSuccessfully('/training');
 		})
 		.catch( error => {
 			console.log(error);
@@ -37,7 +37,7 @@ export class AuthService {
 			authData.password
 		).then(result => {
 			console.log(result);
-			this.authSuccessfully();
+			this.authSuccessfully('/training');
 		})
 		.catch( error => {
 			console.log(error);
